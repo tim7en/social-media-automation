@@ -172,3 +172,18 @@ secrets/
 
 # Alembic
 alembic/versions/*.py
+
+# Node.js dependencies and test artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Test coverage
+ui-tests/coverage/
+.nyc_output
+
+# Jest
+.jest-cache/
