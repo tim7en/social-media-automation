@@ -1,0 +1,36 @@
+{
+  "name": "social-media-automation-ui-tests",
+  "version": "1.0.0",
+  "description": "UI tests for Social Media Automation Platform",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ui": "jest --testPathPattern=ui-tests"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/dom": "^9.3.4",
+    "@testing-library/user-event": "^14.5.1",
+    "global-jsdom": "^9.2.0",
+    "fetch-mock-jest": "^1.5.1"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": ["<rootDir>/ui-tests/setup.js"],
+    "testMatch": [
+      "<rootDir>/ui-tests/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "static/js/**/*.js",
+      "!static/js/**/*.min.js"
+    ],
+    "coverageDirectory": "ui-tests/coverage",
+    "coverageReporters": ["text", "lcov", "html"],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/static/$1"
+    }
+  }
+}
