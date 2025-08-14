@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Generation Debug - Social Media Automation</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-magic"></i> Content Debug</h2>
+                <p>Generation & Processing</p>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" onclick="showSection('generation')">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Generation Queue</span>
+                </li>
+                <li class="nav-item" onclick="showSection('processing')">
+                    <i class="fas fa-cog"></i>
+                    <span>Processing Pipeline</span>
+                </li>
+                <li class="nav-item" onclick="showSection('ai-services')">
+                    <i class="fas fa-robot"></i>
+                    <span>AI Services</span>
+                </li>
+                <li class="nav-item" onclick="showSection('templates')">
+                    <i class="fas fa-layer-group"></i>
+                    <span>Templates</span>
+                </li>
+                <li class="nav-item" onclick="showSection('logs')">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Debug Logs</span>
+                </li>
+                <li class="nav-item" onclick="window.location.href='/dashboard'">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Dashboard</span>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1 id="section-title">Content Generation Queue</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="createTestContent()">
+                        <i class="fas fa-plus"></i> Create Test Content
+                    </button>
+                    <button class="btn btn-secondary" onclick="refreshData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </header>
+
+            <!-- Generation Queue Section -->
+            <section id="generation-section" class="content-section active">
+                <div class="section-controls">
+                    <div class="control-group">
+                        <label>Filter by Status:</label>
+                        <select id="status-filter" onchange="filterQueue()">
+                            <option value="all">All Tasks</option>
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="completed">Completed</option>
+                            <option value="failed">Failed</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Content Type:</label>
+                        <select id="type-filter" onchange="filterQueue()">
+                            <option value="all">All Types</option>
+                            <option value="video">Video</option>
+                            <option value="image">Image</option>
+                            <option value="text">Text</option>
+                            <option value="audio">Audio</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="content-debug-grid">
+                    <div class="debug-panel" style="grid-column: 1 / -1;">
+                        <h3>Active Generation Tasks</h3>
+                        <div id="task-list" class="task-grid">
+                            <!-- Tasks will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="pending-count">0</h3>
+                            <p>Pending Tasks</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-spinner"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="processing-count">0</h3>
+                            <p>Processing</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="completed-count">0</h3>
+                            <p>Completed Today</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="failed-count">0</h3>
+                            <p>Failed</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Processing Pipeline Section -->
+            <section id="processing-section" class="content-section">
+                <div class="pipeline-container">
+                    <h3>Content Processing Pipeline</h3>
+                    <div class="pipeline-flow">
+                        <div class="pipeline-stage active">
+                            <div class="stage-icon"><i class="fas fa-edit"></i></div>
+                            <div class="stage-title">Script Generation</div>
+                            <div class="stage-status">Active</div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-stage processing">
+                            <div class="stage-icon"><i class="fas fa-microphone"></i></div>
+                            <div class="stage-title">Voice Synthesis</div>
+                            <div class="stage-status">Processing</div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-stage pending">
+                            <div class="stage-icon"><i class="fas fa-video"></i></div>
+                            <div class="stage-title">Video Creation</div>
+                            <div class="stage-status">Pending</div>
+                        </div>
+                        <div class="pipeline-arrow">→</div>
+                        <div class="pipeline-stage pending">
+                            <div class="stage-icon"><i class="fas fa-upload"></i></div>
+                            <div class="stage-title">Publishing</div>
+                            <div class="stage-status">Pending</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-debug-grid">
+                    <div class="debug-panel">
+                        <h3>Pipeline Metrics</h3>
+                        <canvas id="pipelineChart"></canvas>
+                    </div>
+                    <div class="debug-panel">
+                        <h3>Stage Performance</h3>
+                        <div id="stage-performance">
+                            <!-- Performance metrics will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Services Section -->
+            <section id="ai-services-section" class="content-section">
+                <div class="content-debug-grid">
+                    <div class="debug-panel">
+                        <h3>OpenAI GPT Integration</h3>
+                        <div class="service-details">
+                            <div class="service-stat">
+                                <span>Status:</span>
+                                <span class="status-badge online">Online</span>
+                            </div>
+                            <div class="service-stat">
+                                <span>Model:</span>
+                                <span>GPT-4-Turbo</span>
+                            </div>
+                            <div class="service-stat">
+                                <span>Requests Today:</span>
+                                <span>247</span>
+                            </div>
+                            <div class="service-stat">
+                                <span>Average Response:</span>
+                                <span>2.3s</span>
+                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="testAIService('openai')">Test Connection</button>
+                        </div>
+                    </div>
+
+                    <div class="debug-panel">
+                        <h3>ElevenLabs Voice Synthesis</h3>
+                        <div class="service-details">
+                            <div class="service-stat">
+                                <span>Status:</span>
+                                <span class="status-badge online">Online</span>
+                            </div>
+                            <div class="service-stat">
+                                <span>Voice Model:</span>
+                                <span>Multilingual-v2</span>
+                            </div>
+                            <div class="service-stat">
+                                <span>Characters Used:</span>
+                                <span>12,847</span>
+                            </div>
+                            <div class="service-stat">
+                                <span>Quality:</span>
+                                <span>High</span>
+                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="testAIService('elevenlabs')">Test Voice</button>
+                        </div>
+                    </div>
+
+                    <div class="debug-panel">
+                        <h3>Video Processing</h3>
+                        <div class="service-details">
+                            <div class="service-stat">
+                                <span>Status:</span>
+                                <span class="status-badge online">Online</span>
+                            </div>
+                            <div class="service-stat">
+                                <span>Queue Length:</span>
+                                <span>3 videos</span>
+                            </div>
+                            <div class="service-stat">
+                                <span>Average Time:</span>
+                                <span>45s</span>
+                            </div>
+                            <div class="service-stat">
+                                <span>Success Rate:</span>
+                                <span>96%</span>
+                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="testVideoProcessing()">Test Processing</button>
+                        </div>
+                    </div>
+
+                    <div class="debug-panel">
+                        <h3>Image Generation</h3>
+                        <div class="service-details">
+                            <div class="service-stat">
+                                <span>Status:</span>
+                                <span class="status-badge limited">Limited</span>
+                            </div>
+                            <div class="service-stat">
+                                <span>Provider:</span>
+                                <span>DALL-E 3</span>
+                            </div>
+                            <div class="service-stat">
+                                <span>Images Today:</span>
+                                <span>15/50</span>
+                            </div>
+                            <div class="service-stat">
+                                <span>Resolution:</span>
+                                <span>1024x1024</span>
+                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="testAIService('dalle')">Test Generation</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Templates Section -->
+            <section id="templates-section" class="content-section">
+                <div class="section-controls">
+                    <button class="btn btn-primary" onclick="createTemplate()">
+                        <i class="fas fa-plus"></i> Create Template
+                    </button>
+                    <button class="btn btn-secondary" onclick="importTemplate()">
+                        <i class="fas fa-download"></i> Import Template
+                    </button>
+                </div>
+
+                <div class="content-debug-grid">
+                    <div class="debug-panel">
+                        <h3>Video Templates</h3>
+                        <div id="video-templates" class="template-list">
+                            <!-- Video templates will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="debug-panel">
+                        <h3>Script Templates</h3>
+                        <div id="script-templates" class="template-list">
+                            <!-- Script templates will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="debug-panel">
+                        <h3>Social Media Templates</h3>
+                        <div id="social-templates" class="template-list">
+                            <!-- Social templates will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Logs Section -->
+            <section id="logs-section" class="content-section">
+                <div class="log-controls">
+                    <select id="log-source">
+                        <option value="all">All Sources</option>
+                        <option value="content">Content Generation</option>
+                        <option value="ai">AI Services</option>
+                        <option value="video">Video Processing</option>
+                        <option value="errors">Errors Only</option>
+                    </select>
+                    <select id="log-level">
+                        <option value="all">All Levels</option>
+                        <option value="debug">Debug</option>
+                        <option value="info">Info</option>
+                        <option value="warning">Warning</option>
+                        <option value="error">Error</option>
+                    </select>
+                    <button class="btn btn-sm" onclick="refreshLogs()">Refresh</button>
+                    <button class="btn btn-sm" onclick="exportLogs()">Export</button>
+                    <button class="btn btn-sm" onclick="clearLogs()">Clear</button>
+                </div>
+
+                <div class="log-viewer" id="content-logs">
+                    <!-- Logs will be loaded here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Task Detail Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeTaskModal()">&times;</span>
+            <div id="task-detail-content">
+                <!-- Task details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .task-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .task-card {
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 1rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .task-card.processing {
+            border-left: 4px solid #ffc107;
+            background: #fff9e6;
+        }
+
+        .task-card.completed {
+            border-left: 4px solid #28a745;
+            background: #f8fff8;
+        }
+
+        .task-card.failed {
+            border-left: 4px solid #dc3545;
+            background: #fff8f8;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .task-id {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .task-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .task-progress {
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .pipeline-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .pipeline-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .pipeline-stage {
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            padding: 1rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .pipeline-stage.active {
+            border-color: #28a745;
+            background: #f8fff8;
+        }
+
+        .pipeline-stage.processing {
+            border-color: #ffc107;
+            background: #fff9e6;
+        }
+
+        .pipeline-stage.pending {
+            border-color: #6c757d;
+            background: #f8f9fa;
+        }
+
+        .stage-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stage-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .stage-status {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .pipeline-arrow {
+            font-size: 1.5rem;
+            color: #6c757d;
+            margin: 0 0.5rem;
+        }
+
+        .service-details {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .service-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .template-list {
+            display: grid;
+            gap: 0.75rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .template-item {
+            padding: 1rem;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .template-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .template-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .template-description {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .pipeline-flow {
+                flex-direction: column;
+            }
+            
+            .pipeline-arrow {
+                transform: rotate(90deg);
+                margin: 0.5rem 0;
+            }
+            
+            .task-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <script>
+        let currentContentSection = 'generation';
+        let mockTasks = [];
+
+        // Initialize content debug page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeContentDebug();
+            loadMockData();
+            initializePipelineChart();
+        });
+
+        function initializeContentDebug() {
+            console.log('Initializing Content Generation Debug...');
+            generateMockTasks();
+            updateTaskDisplay();
+            updateStats();
+        }
+
+        function generateMockTasks() {
+            const types = ['video', 'image', 'text', 'audio'];
+            const statuses = ['pending', 'processing', 'completed', 'failed'];
+            const titles = [
+                'AI Content Creation Tutorial',
+                'Social Media Tips Carousel',
+                'Platform Comparison Guide',
+                'Weekly Newsletter Content',
+                'Product Demo Video',
+                'Brand Story Animation',
+                'Educational Infographic',
+                'Podcast Episode Script'
+            ];
+
+            mockTasks = [];
+            for (let i = 1; i <= 12; i++) {
+                mockTasks.push({
+                    id: i,
+                    title: titles[Math.floor(Math.random() * titles.length)],
+                    type: types[Math.floor(Math.random() * types.length)],
+                    status: statuses[Math.floor(Math.random() * statuses.length)],
+                    progress: Math.floor(Math.random() * 100),
+                    createdAt: new Date(Date.now() - Math.random() * 86400000 * 7).toLocaleString(),
+                    platform: ['youtube', 'instagram', 'tiktok'][Math.floor(Math.random() * 3)],
+                    duration: Math.floor(Math.random() * 300) + 30 + 's'
+                });
+            }
+        }
+
+        function updateTaskDisplay() {
+            const container = document.getElementById('task-list');
+            if (!container) return;
+
+            const statusFilter = document.getElementById('status-filter')?.value || 'all';
+            const typeFilter = document.getElementById('type-filter')?.value || 'all';
+
+            let filteredTasks = mockTasks;
+            if (statusFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.status === statusFilter);
+            }
+            if (typeFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => task.type === typeFilter);
+            }
+
+            container.innerHTML = filteredTasks.map(task => `
+                <div class="task-card ${task.status}" onclick="showTaskDetail(${task.id})">
+                    <div class="task-header">
+                        <div class="task-title">${task.title}</div>
+                        <div class="task-id">#${task.id}</div>
+                    </div>
+                    <div class="task-meta">
+                        <span><strong>Type:</strong> ${task.type}</span>
+                        <span><strong>Platform:</strong> ${task.platform}</span>
+                        <span><strong>Created:</strong> ${task.createdAt.split(',')[0]}</span>
+                        <span><strong>Duration:</strong> ${task.duration}</span>
+                    </div>
+                    <div class="task-progress">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                            <span class="status-badge ${task.status}">${task.status}</span>
+                            <span>${task.progress}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${task.progress}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            const stats = mockTasks.reduce((acc, task) => {
+                acc[task.status] = (acc[task.status] || 0) + 1;
+                return acc;
+            }, {});
+
+            document.getElementById('pending-count').textContent = stats.pending || 0;
+            document.getElementById('processing-count').textContent = stats.processing || 0;
+            document.getElementById('completed-count').textContent = stats.completed || 0;
+            document.getElementById('failed-count').textContent = stats.failed || 0;
+        }
+
+        function showSection(section) {
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+
+            // Update content sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(`${section}-section`).classList.add('active');
+
+            // Update title
+            const titles = {
+                'generation': 'Content Generation Queue',
+                'processing': 'Processing Pipeline',
+                'ai-services': 'AI Services Status',
+                'templates': 'Content Templates',
+                'logs': 'Debug Logs'
+            };
+            document.getElementById('section-title').textContent = titles[section];
+            currentContentSection = section;
+
+            // Load section data
+            loadSectionData(section);
+        }
+
+        function loadSectionData(section) {
+            switch (section) {
+                case 'templates':
+                    loadTemplates();
+                    break;
+                case 'logs':
+                    loadContentLogs();
+                    break;
+            }
+        }
+
+        function loadTemplates() {
+            const videoTemplates = [
+                { name: 'Educational Video', description: 'Template for educational content with overlays' },
+                { name: 'Product Demo', description: 'Showcase product features and benefits' },
+                { name: 'Tutorial', description: 'Step-by-step instructional video' }
+            ];
+
+            const scriptTemplates = [
+                { name: 'Hook-Problem-Solution', description: 'Engaging script structure for viral content' },
+                { name: 'Storytelling', description: 'Narrative-driven content template' },
+                { name: 'Listicle', description: 'List-based content format' }
+            ];
+
+            const socialTemplates = [
+                { name: 'Instagram Story', description: 'Vertical format for Instagram stories' },
+                { name: 'YouTube Short', description: 'Short-form vertical video template' },
+                { name: 'TikTok Trend', description: 'Trending TikTok video format' }
+            ];
+
+            document.getElementById('video-templates').innerHTML = videoTemplates.map(template => `
+                <div class="template-item">
+                    <div class="template-name">${template.name}</div>
+                    <div class="template-description">${template.description}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('script-templates').innerHTML = scriptTemplates.map(template => `
+                <div class="template-item">
+                    <div class="template-name">${template.name}</div>
+                    <div class="template-description">${template.description}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('social-templates').innerHTML = socialTemplates.map(template => `
+                <div class="template-item">
+                    <div class="template-name">${template.name}</div>
+                    <div class="template-description">${template.description}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadContentLogs() {
+            const logs = [
+                '[2024-01-15 14:35:22] INFO: Started content generation for task #12',
+                '[2024-01-15 14:35:10] SUCCESS: Video processing completed for "AI Tutorial"',
+                '[2024-01-15 14:34:45] WARNING: OpenAI API rate limit approaching',
+                '[2024-01-15 14:34:20] ERROR: Failed to generate voice for task #8',
+                '[2024-01-15 14:33:55] INFO: Template "Educational Video" loaded successfully',
+                '[2024-01-15 14:33:30] DEBUG: Processing pipeline stage 2 completed',
+                '[2024-01-15 14:33:15] INFO: ElevenLabs voice synthesis started',
+                '[2024-01-15 14:32:40] SUCCESS: Script generation completed for task #15'
+            ];
+
+            document.getElementById('content-logs').innerHTML = logs.map(log => {
+                const level = log.includes('ERROR') ? 'error' : 
+                             log.includes('WARNING') ? 'warning' : 
+                             log.includes('SUCCESS') ? 'success' : 
+                             log.includes('DEBUG') ? 'debug' : 'info';
+                return `<div class="log-entry ${level}">${log}</div>`;
+            }).join('');
+        }
+
+        function initializePipelineChart() {
+            const ctx = document.getElementById('pipelineChart');
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Script Gen', 'Voice Synth', 'Video Create', 'Publishing'],
+                    datasets: [{
+                        label: 'Average Time (seconds)',
+                        data: [15, 45, 120, 30],
+                        backgroundColor: ['#28a745', '#ffc107', '#17a2b8', '#6f42c1']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function showTaskDetail(taskId) {
+            const task = mockTasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            const modalContent = document.getElementById('task-detail-content');
+            modalContent.innerHTML = `
+                <h3>Task #${task.id}: ${task.title}</h3>
+                <div class="task-details">
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <strong>Type:</strong> ${task.type}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Status:</strong> <span class="status-badge ${task.status}">${task.status}</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Platform:</strong> ${task.platform}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Progress:</strong> ${task.progress}%
+                        </div>
+                        <div class="detail-item">
+                            <strong>Created:</strong> ${task.createdAt}
+                        </div>
+                        <div class="detail-item">
+                            <strong>Duration:</strong> ${task.duration}
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        <button class="btn btn-primary" onclick="retryTask(${task.id})">
+                            <i class="fas fa-redo"></i> Retry
+                        </button>
+                        <button class="btn btn-secondary" onclick="viewTaskLogs(${task.id})">
+                            <i class="fas fa-file-alt"></i> View Logs
+                        </button>
+                        <button class="btn btn-danger" onclick="cancelTask(${task.id})">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('taskModal').style.display = 'block';
+        }
+
+        function filterQueue() {
+            updateTaskDisplay();
+        }
+
+        function createTestContent() {
+            alert('Test content creation initiated. Check the generation queue for updates.');
+            // Add a new mock task
+            const newTask = {
+                id: mockTasks.length + 1,
+                title: 'Test Content - ' + new Date().toLocaleTimeString(),
+                type: 'video',
+                status: 'pending',
+                progress: 0,
+                createdAt: new Date().toLocaleString(),
+                platform: 'youtube',
+                duration: '60s'
+            };
+            mockTasks.unshift(newTask);
+            updateTaskDisplay();
+            updateStats();
+        }
+
+        function refreshData() {
+            generateMockTasks();
+            updateTaskDisplay();
+            updateStats();
+            alert('Data refreshed successfully');
+        }
+
+        function testAIService(service) {
+            alert(`Testing ${service} connection...`);
+            setTimeout(() => {
+                alert(`${service} connection test successful!`);
+            }, 2000);
+        }
+
+        function testVideoProcessing() {
+            alert('Testing video processing pipeline...');
+            setTimeout(() => {
+                alert('Video processing test completed successfully!');
+            }, 3000);
+        }
+
+        function createTemplate() {
+            alert('Template creation wizard would open here');
+        }
+
+        function importTemplate() {
+            alert('Template import dialog would open here');
+        }
+
+        function refreshLogs() {
+            loadContentLogs();
+            alert('Logs refreshed');
+        }
+
+        function exportLogs() {
+            alert('Logs exported to debug-logs.json');
+        }
+
+        function clearLogs() {
+            document.getElementById('content-logs').innerHTML = '<div class="log-entry info">Logs cleared</div>';
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModal').style.display = 'none';
+        }
+
+        function retryTask(taskId) {
+            const task = mockTasks.find(t => t.id === taskId);
+            if (task) {
+                task.status = 'pending';
+                task.progress = 0;
+                updateTaskDisplay();
+                updateStats();
+                closeTaskModal();
+                alert(`Task #${taskId} queued for retry`);
+            }
+        }
+
+        function viewTaskLogs(taskId) {
+            alert(`Viewing detailed logs for task #${taskId}`);
+        }
+
+        function cancelTask(taskId) {
+            if (confirm(`Are you sure you want to cancel task #${taskId}?`)) {
+                const taskIndex = mockTasks.findIndex(t => t.id === taskId);
+                if (taskIndex !== -1) {
+                    mockTasks.splice(taskIndex, 1);
+                    updateTaskDisplay();
+                    updateStats();
+                    closeTaskModal();
+                    alert(`Task #${taskId} cancelled`);
+                }
+            }
+        }
+
+        function loadMockData() {
+            // Load stage performance data
+            const stagePerformance = document.getElementById('stage-performance');
+            if (stagePerformance) {
+                stagePerformance.innerHTML = `
+                    <div class="service-stat">
+                        <span>Script Generation:</span>
+                        <span>98% success</span>
+                    </div>
+                    <div class="service-stat">
+                        <span>Voice Synthesis:</span>
+                        <span>95% success</span>
+                    </div>
+                    <div class="service-stat">
+                        <span>Video Creation:</span>
+                        <span>92% success</span>
+                    </div>
+                    <div class="service-stat">
+                        <span>Publishing:</span>
+                        <span>89% success</span>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
