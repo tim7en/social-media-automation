@@ -11,6 +11,9 @@ from .core.config import settings
 from .core.database import engine
 from .models import Base
 from .core.logger import logger
+from .middleware.error_handler import ErrorHandlerMiddleware
+from .middleware.security import RateLimitMiddleware, SecurityHeadersMiddleware, InputValidationMiddleware
+from .middleware.health_check import router as health_router
 
 
 @asynccontextmanager
@@ -22,6 +25,10 @@ async def lifespan(app: FastAPI):
     # Create database tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    
+    # Initialize performance monitoring and caching
+    from .utils.performance import init_performance_utils
+    await init_performance_utils()
     
     yield
     
@@ -38,6 +45,12 @@ app = FastAPI(
     redoc_url="/redoc" if settings.DEBUG else None,
 )
 
+# Security middleware (order is important!)
+app.add_middleware(ErrorHandlerMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(InputValidationMiddleware)
+app.add_middleware(RateLimitMiddleware, calls=100, period=900)  # 100 calls per 15 minutes
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -51,6 +64,7 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # API routes
+app.include_router(health_router, tags=["Health"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(content.router, prefix="/api/v1/content", tags=["Content Generation"])
 app.include_router(platforms.router, prefix="/api/v1/platforms", tags=["Social Platforms"])
@@ -73,16 +87,13 @@ async def root():
 async def health_check():
     """Detailed health check"""
     try:
-        # Check database connection
-        # Check Redis connection
-        # Check external API availability
+        # This endpoint is now handled by the health_router
+        # but keeping this for backward compatibility
         return {
             "status": "healthy",
-            "components": {
-                "database": "healthy",
-                "redis": "healthy",
-                "storage": "healthy"
-            }
+            "message": "Social Media Automation Platform",
+            "version": "1.0.0",
+            "redirect": "/health/detailed"
         }
     except Exception as e:
         logger.error(f"Health check failed: {e}")
