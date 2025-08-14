@@ -30,7 +30,7 @@ services:
     volumes:
       - ./src:/app/src
       - /tmp/generated_content:/tmp/generated_content
-    command: celery -A src.core.celery_app worker --loglevel=info
+    command: celery -A src.core.celery_app:celery_app worker --loglevel=info
 
   # Celery Beat (Scheduler)
   beat:
@@ -43,7 +43,7 @@ services:
       - redis
     volumes:
       - ./src:/app/src
-    command: celery -A src.core.celery_app beat --loglevel=info
+    command: celery -A src.core.celery_app:celery_app beat --loglevel=info
 
   # Flower (Celery Monitoring)
   flower:
@@ -54,7 +54,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
     depends_on:
       - redis
-    command: celery -A src.core.celery_app flower --port=5555
+    command: celery -A src.core.celery_app:celery_app flower --port=5555
 
   # PostgreSQL Database
   db:

@@ -7,7 +7,6 @@ celery_app = Celery(
     backend=settings.CELERY_RESULT_BACKEND,
     include=[
         "src.tasks.content_generation",
-        "src.tasks.video_processing",
         "src.tasks.social_publishing",
         "src.tasks.analytics"
     ]
