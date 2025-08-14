@@ -199,13 +199,21 @@ class InputValidationMiddleware(BaseHTTPMiddleware):
         """Validate request for suspicious patterns"""
         import re
         
+        # Skip validation for dashboard and static file requests
+        path = str(request.url.path)
+        if path.startswith('/dashboard') or path.startswith('/static') or path.startswith('/api-keys'):
+            return True
+        
         # Check query parameters
         for key, value in request.query_params.items():
+            # Skip VS Code browser request IDs and common parameters
+            if key.lower() in ['id', 'vscodebrowerreqid', 'vscodebrowserreqid', '_t', 'timestamp']:
+                continue
             if self._contains_suspicious_content(value):
                 return False
         
         # Check headers (exclude common ones that might contain these patterns legitimately)
-        safe_headers = {'user-agent', 'accept', 'accept-encoding', 'accept-language', 'referer'}
+        safe_headers = {'user-agent', 'accept', 'accept-encoding', 'accept-language', 'referer', 'host', 'connection'}
         for name, value in request.headers.items():
             if name.lower() not in safe_headers and self._contains_suspicious_content(value):
                 return False

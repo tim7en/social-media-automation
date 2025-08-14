@@ -9,17 +9,94 @@ let charts = {};
 
 // Initialize dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    initializeDashboard();
-    setupEventListeners();
-    if (authToken) {
-        loadInitialData();
+    console.log('DOM Content Loaded - Starting Dashboard Initialization');
+    
+    // Check URL and set appropriate section
+    const currentPath = window.location.pathname;
+    let initialSection = 'overview';
+    
+    if (currentPath.includes('/analytics')) {
+        initialSection = 'analytics';
+    } else if (currentPath.includes('/monitoring')) {
+        initialSection = 'monitoring';
+    } else if (currentPath.includes('/api-testing')) {
+        initialSection = 'api-testing';
+    } else if (currentPath.includes('/platforms')) {
+        initialSection = 'platforms';
+    } else if (currentPath.includes('/workflows')) {
+        initialSection = 'workflows';
+    } else if (currentPath.includes('/content')) {
+        initialSection = 'content';
+    } else if (currentPath.includes('/api-keys')) {
+        initialSection = 'api-keys';
     }
-    startAutoRefresh();
+    
+    console.log('Initial section based on URL:', initialSection);
+    
+    try {
+        initializeDashboard();
+        setupEventListeners();
+        
+        // Switch to the appropriate section
+        if (initialSection !== 'overview') {
+            setTimeout(() => switchSection(initialSection), 100);
+        }
+        
+        if (authToken) {
+            loadInitialData();
+        }
+        startAutoRefresh();
+    } catch (error) {
+        console.error('Dashboard initialization failed:', error);
+        // Fallback navigation setup
+        setupBasicNavigation();
+        
+        // Still try to switch sections even if initialization failed
+        if (initialSection !== 'overview') {
+            setTimeout(() => switchSection(initialSection), 100);
+        }
+    }
 });
+
+// Fallback navigation function
+function setupBasicNavigation() {
+    console.log('Setting up basic navigation fallback');
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.onclick = function() {
+            const section = this.getAttribute('data-section');
+            console.log('Basic nav clicked:', section);
+            
+            // Simple section switching
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+            
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            const target = document.getElementById(section + '-section');
+            if (target) {
+                target.classList.add('active');
+            }
+        };
+    });
+}
 
 // Initialize dashboard components
 function initializeDashboard() {
     console.log('Initializing Social Media Automation Dashboard...');
+    
+    // Debug: List all content sections
+    const contentSections = document.querySelectorAll('.content-section');
+    console.log('Found content sections:', contentSections.length);
+    contentSections.forEach(section => {
+        console.log('Section ID:', section.id, 'Active:', section.classList.contains('active'));
+    });
+    
+    // Debug: List all nav items
+    const navItems = document.querySelectorAll('.nav-item');
+    console.log('Found nav items:', navItems.length);
+    navItems.forEach(item => {
+        console.log('Nav item:', item.getAttribute('data-section'), 'Active:', item.classList.contains('active'));
+    });
     
     // Check authentication status
     checkAuthStatus();
@@ -37,9 +114,13 @@ function initializeDashboard() {
 function setupEventListeners() {
     // Navigation menu
     const navItems = document.querySelectorAll('.nav-item');
+    console.log('Found navigation items:', navItems.length);
+    
     navItems.forEach(item => {
-        item.addEventListener('click', function() {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
             const section = this.getAttribute('data-section');
+            console.log('Navigation clicked:', section);
             switchSection(section);
         });
     });
@@ -91,17 +172,33 @@ async function checkAuthStatus() {
 
 // Section navigation
 function switchSection(sectionName) {
+    console.log('Switching to section:', sectionName);
+    
     // Update navigation
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
-    document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+    
+    const activeNavItem = document.querySelector(`[data-section="${sectionName}"]`);
+    if (activeNavItem) {
+        activeNavItem.classList.add('active');
+        console.log('Active nav item set for:', sectionName);
+    } else {
+        console.error('Nav item not found for section:', sectionName);
+    }
     
     // Update content sections
     document.querySelectorAll('.content-section').forEach(section => {
         section.classList.remove('active');
     });
-    document.getElementById(`${sectionName}-section`).classList.add('active');
+    
+    const targetSection = document.getElementById(`${sectionName}-section`);
+    if (targetSection) {
+        targetSection.classList.add('active');
+        console.log('Content section activated:', sectionName);
+    } else {
+        console.error('Content section not found:', `${sectionName}-section`);
+    }
     
     // Update section title
     const titleMap = {
@@ -115,34 +212,76 @@ function switchSection(sectionName) {
         'api-keys': 'API Key Management'
     };
     
-    document.getElementById('section-title').textContent = titleMap[sectionName] || 'Dashboard';
+    const titleElement = document.getElementById('section-title');
+    if (titleElement) {
+        titleElement.textContent = titleMap[sectionName] || 'Dashboard';
+    }
     currentSection = sectionName;
     
-    // Load section-specific data
-    loadSectionData(sectionName);
+    // Load section-specific data (with error handling)
+    try {
+        loadSectionData(sectionName);
+    } catch (error) {
+        console.warn('Failed to load section data for', sectionName, ':', error);
+        // Continue anyway - the section will still be visible
+    }
 }
 
 // Load section-specific data
 async function loadSectionData(section) {
-    switch (section) {
-        case 'overview':
-            await loadOverviewData();
-            break;
-        case 'content':
-            await loadContentData();
-            break;
-        case 'workflows':
-            await loadWorkflowData();
-            break;
-        case 'platforms':
-            await loadPlatformData();
-            break;
-        case 'analytics':
-            await loadAnalyticsData();
-            break;
-        case 'monitoring':
-            await loadMonitoringData();
-            break;
+    console.log('Loading data for section:', section);
+    try {
+        switch (section) {
+            case 'overview':
+                await loadOverviewData();
+                break;
+            case 'content':
+                await loadContentData();
+                break;
+            case 'workflows':
+                await loadWorkflowData();
+                break;
+            case 'platforms':
+                await loadPlatformData();
+                break;
+            case 'analytics':
+                await loadAnalyticsData();
+                break;
+            case 'monitoring':
+                await loadMonitoringData();
+                break;
+            case 'api-testing':
+                // API testing section doesn't need async data loading
+                console.log('API testing section loaded');
+                break;
+            case 'api-keys':
+                // API keys section is loaded via iframe
+                console.log('API keys section loaded');
+                break;
+            default:
+                console.log('No specific data loading for section:', section);
+        }
+    } catch (error) {
+        console.warn('Failed to load data for section', section, ':', error);
+        // Show a user-friendly message in the section
+        showSectionError(section, error);
+    }
+}
+
+// Show error message in section
+function showSectionError(section, error) {
+    const sectionElement = document.getElementById(`${section}-section`);
+    if (sectionElement && !sectionElement.querySelector('.error-message')) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.innerHTML = `
+            <div style="background: #f8d7da; color: #721c24; padding: 1rem; border-radius: 4px; margin: 1rem 0;">
+                <strong>⚠️ Unable to load data</strong><br>
+                Section is available but data loading failed. You can still use the interface.
+                <br><small>Error: ${error.message || 'Unknown error'}</small>
+            </div>
+        `;
+        sectionElement.insertBefore(errorDiv, sectionElement.firstChild);
     }
 }
 

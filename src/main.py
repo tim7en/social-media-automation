@@ -87,6 +87,36 @@ async def content_debug():
     return FileResponse("static/templates/content-debug.html")
 
 
+@app.get("/dashboard/analytics")
+async def analytics_page():
+    """Serve the analytics dashboard"""
+    return FileResponse("static/index.html")
+
+
+@app.get("/dashboard/monitoring")
+async def monitoring_page():
+    """Serve the system health monitoring page"""
+    return FileResponse("static/index.html")
+
+
+@app.get("/dashboard/api-testing")
+async def api_testing_page():
+    """Serve the API testing page"""
+    return FileResponse("static/index.html")
+
+
+@app.get("/dashboard/platforms")
+async def platforms_page():
+    """Serve the platforms management page"""
+    return FileResponse("static/index.html")
+
+
+@app.get("/dashboard/workflows")
+async def workflows_page():
+    """Serve the workflows management page"""
+    return FileResponse("static/index.html")
+
+
 @app.get("/api-keys")
 async def api_keys_page():
     """Serve the API keys management page"""
