@@ -6,7 +6,7 @@ import uvicorn
 import os
 from contextlib import asynccontextmanager
 
-from .api.routers import content, platforms, auth, analytics, webhooks, starter_pro
+from .api.routers import content, platforms, auth, analytics, webhooks, starter_pro, workflows
 from .core.config import settings
 from .core.database import engine
 from .models import Base
@@ -71,6 +71,7 @@ app.include_router(platforms.router, prefix="/api/v1/platforms", tags=["Social P
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
 app.include_router(webhooks.router, prefix="/webhooks", tags=["Webhooks"])
 app.include_router(starter_pro.router, prefix="/api/v1/starter-pro", tags=["Starter Pro"])
+app.include_router(workflows.router, tags=["Workflows"])
 
 
 @app.get("/")
