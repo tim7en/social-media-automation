@@ -232,7 +232,7 @@ def assert_success_response(response_data: dict, data_fields: list = None):
 
 async def create_test_user(db: AsyncSession, user_data: dict = None) -> dict:
     """Create a test user in the database."""
-    from src.services.auth_service import AuthService
+    # from src.services.auth_service import AuthService  # TODO: Create auth service
     
     if not user_data:
         user_data = {

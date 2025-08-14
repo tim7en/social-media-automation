@@ -85,8 +85,8 @@ def module_exists_locally(module_name: str, src_root: Path) -> bool:
     if not module_name.startswith('src.'):
         return True  # Not a local module
     
-    # Convert module path to file path
-    module_parts = module_name.split('.')
+    # Convert module path to file path - skip the 'src' part since we're already in src_root
+    module_parts = module_name.split('.')[1:]  # Remove 'src' from the beginning
     
     # Try as a package (directory with __init__.py)
     package_path = src_root
