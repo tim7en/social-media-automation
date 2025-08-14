@@ -1,7 +1,7 @@
 # Core dependencies
 fastapi==0.104.1
 uvicorn==0.24.0
-pydantic==2.5.0
+pydantic==2.6.4
 python-dotenv==1.0.0
 celery==5.3.4
 redis==5.0.1
@@ -26,8 +26,8 @@ google-auth-httplib2==0.1.1
 google-api-python-client==2.109.0
 facebook-sdk==3.1.0
 pytube==15.0.0
-instagrapi==2.0.0
-TikTokApi==5.2.4
+instagrapi==2.1.1
+TikTokApi==6.5.2
 
 # Video and Audio Processing
 ffmpeg-python==0.2.0
