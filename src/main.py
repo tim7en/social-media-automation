@@ -75,6 +75,18 @@ app.include_router(starter_pro.router, prefix="/api/v1/starter-pro", tags=["Star
 app.include_router(workflows.router, tags=["Workflows"])
 
 
+@app.get("/dashboard")
+async def dashboard():
+    """Serve the main debugging dashboard"""
+    return FileResponse("static/index.html")
+
+
+@app.get("/dashboard/content")
+async def content_debug():
+    """Serve the content generation debugging page"""
+    return FileResponse("static/templates/content-debug.html")
+
+
 @app.get("/api-keys")
 async def api_keys_page():
     """Serve the API keys management page"""
@@ -83,12 +95,14 @@ async def api_keys_page():
 
 @app.get("/")
 async def root():
-    """Health check endpoint"""
+    """Health check endpoint with dashboard link"""
     return {
         "message": "Social Media Automation Platform",
         "status": "healthy",
         "version": "1.0.0",
-        "api_keys_management": "/api-keys"
+        "dashboard": "/dashboard",
+        "api_keys_management": "/api-keys",
+        "api_docs": "/docs"
     }
 
 
