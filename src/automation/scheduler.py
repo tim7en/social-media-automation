@@ -113,9 +113,13 @@ class ContentScheduler:
         
         if not end_date:
             end_date = datetime.utcnow() + timedelta(days=30)  # Default to 30 days
+        elif isinstance(end_date, str):
+            end_date = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
         
         if not start_time:
             start_time = datetime.utcnow()
+        elif isinstance(start_time, str):
+            start_time = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
         
         scheduled_times = {}
         
