@@ -7,17 +7,41 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 from pydantic import BaseModel
-# from ...schemas.schemas import ContentRequest, User
-# from ...core.database import get_db_session
-# from ...core.logger import logger
+from ...core.logger import logger
 
-# Commenting out non-existent imports for testing purposes
-# from ..starter_pro.workflow import StarterProWorkflow
-# from ..starter_pro.ai_video_tools import FlikiIntegration, HeyGenIntegration
-# from ..starter_pro.ai_video_generators import AIVideoManager, RunwayIntegration, PikaIntegration
-# from ..starter_pro.capcut_integration import CapCutIntegration, CapCutWorkflows
-# from ..starter_pro.canva_integration import CanvaIntegration, CanvaBrandManager
-# from ..starter_pro.metricool_integration import MetricoolIntegration, MetricoolWorkflowManager
+# Placeholder classes for development
+class StarterProWorkflow:
+    async def create_complete_workflow(self, **kwargs):
+        return {"success": True, "message": "Workflow created"}
+    
+    async def generate_content_calendar(self, **kwargs):
+        return {"success": True, "calendar": []}
+    
+    async def generate_content_ideas(self, **kwargs):
+        return {"success": True, "ideas": []}
+    
+    async def create_video_script(self, **kwargs):
+        return {"success": True, "script": "Sample script"}
+
+class AIVideoManager:
+    pass
+
+class CapCutWorkflows:
+    pass
+
+class CanvaBrandManager:
+    async def setup_complete_brand(self, **kwargs):
+        return {"success": True, "brand_kit_id": "test-123"}
+
+class MetricoolWorkflowManager:
+    async def setup_automated_publishing(self, **kwargs):
+        return {"success": True, "next_post": datetime.now().isoformat()}
+
+# Temporarily using placeholders
+try:
+    from ...services.starter_pro.workflow import StarterProWorkflow
+except ImportError:
+    pass
 
 
 router = APIRouter()

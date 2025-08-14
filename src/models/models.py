@@ -21,6 +21,7 @@ class User(Base):
     # Relationships
     projects = relationship("Project", back_populates="owner")
     content_items = relationship("ContentItem", back_populates="creator")
+    api_keys = relationship("ApiKey", back_populates="user")
 
 
 class Project(Base):
@@ -54,7 +55,7 @@ class ContentItem(Base):
     
     # Content data
     script = Column(Text)  # Generated script/text
-    metadata = Column(JSON)  # Additional metadata
+    content_metadata = Column(JSON)  # Additional metadata
     file_paths = Column(JSON)  # Paths to generated files
     
     # AI settings used
@@ -70,6 +71,24 @@ class ContentItem(Base):
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class ApiKey(Base):
+    """User API keys for external services"""
+    __tablename__ = "api_keys"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    service_name = Column(String, nullable=False)  # openai, elevenlabs, fliki, heygen, etc.
+    api_key = Column(String, nullable=False)  # Encrypted API key
+    is_active = Column(Boolean, default=True)
+    last_used = Column(DateTime(timezone=True))
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    user = relationship("User", back_populates="api_keys")
 
 
 class SocialAccount(Base):

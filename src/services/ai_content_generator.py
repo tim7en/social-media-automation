@@ -1,24 +1,42 @@
 from typing import Optional, Dict, Any
 import openai
+from sqlalchemy.ext.asyncio import AsyncSession
 from ..core.config import settings
 from ..core.logger import logger
+from .api_key_service import api_key_service
 
 
 class AIContentGenerator:
     """AI-powered content generation service"""
     
     def __init__(self):
-        self.openai_client = openai.AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+        # Don't initialize with global API key anymore
+        self.default_model = settings.OPENAI_MODEL if hasattr(settings, 'OPENAI_MODEL') else "gpt-3.5-turbo"
+    
+    async def _get_openai_client(self, user_id: int, db: AsyncSession) -> Optional[openai.AsyncOpenAI]:
+        """Get OpenAI client with user-specific API key"""
+        api_key = await api_key_service.get_user_api_key(user_id, "openai", db)
+        if not api_key:
+            logger.warning(f"No OpenAI API key found for user {user_id}")
+            return None
+        
+        return openai.AsyncOpenAI(api_key=api_key)
     
     async def generate_script(
         self,
         topic: str,
+        user_id: int,
+        db: AsyncSession,
         style: str = "engaging",
         duration: int = 60,
         platform: str = "youtube",
         additional_context: Optional[str] = None
     ) -> Dict[str, Any]:
         """Generate a script for video content"""
+        
+        client = await self._get_openai_client(user_id, db)
+        if not client:
+            raise ValueError("OpenAI API key not configured for this user")
         
         # Calculate approximate word count based on duration
         words_per_minute = 150
@@ -29,8 +47,8 @@ class AIContentGenerator:
         )
         
         try:
-            response = await self.openai_client.chat.completions.create(
-                model=settings.OPENAI_MODEL,
+            response = await client.chat.completions.create(
+                model=self.default_model,
                 messages=[
                     {"role": "system", "content": self._get_system_prompt()},
                     {"role": "user", "content": prompt}
@@ -44,7 +62,7 @@ class AIContentGenerator:
             # Parse the response to extract different sections
             parsed_script = self._parse_script_response(script)
             
-            logger.info(f"Generated script for topic: {topic}")
+            logger.info(f"Generated script for topic: {topic} (user: {user_id})")
             
             return {
                 "script": script,

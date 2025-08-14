@@ -65,7 +65,7 @@ class Settings(BaseSettings):
     # Content Settings
     DEFAULT_VIDEO_DURATION: int = 60
     MAX_VIDEO_SIZE_MB: int = 50
-    CONTENT_OUTPUT_DIR: str = "/tmp/generated_content"
+    CONTENT_OUTPUT_DIR: str = "./output"
     
     # Celery
     CELERY_BROKER_URL: str = "redis://localhost:6379/0"

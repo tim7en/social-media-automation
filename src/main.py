@@ -6,7 +6,7 @@ import uvicorn
 import os
 from contextlib import asynccontextmanager
 
-from .api.routers import content, platforms, auth, analytics, webhooks, starter_pro, workflows
+from .api.routers import content, platforms, auth, analytics, webhooks, starter_pro, workflows, api_keys
 from .core.config import settings
 from .core.database import engine
 from .models import Base
@@ -66,6 +66,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # API routes
 app.include_router(health_router, tags=["Health"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
+app.include_router(api_keys.router, prefix="/api/v1", tags=["API Keys"])
 app.include_router(content.router, prefix="/api/v1/content", tags=["Content Generation"])
 app.include_router(platforms.router, prefix="/api/v1/platforms", tags=["Social Platforms"])
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
@@ -74,13 +75,20 @@ app.include_router(starter_pro.router, prefix="/api/v1/starter-pro", tags=["Star
 app.include_router(workflows.router, tags=["Workflows"])
 
 
+@app.get("/api-keys")
+async def api_keys_page():
+    """Serve the API keys management page"""
+    return FileResponse("static/templates/api-keys.html")
+
+
 @app.get("/")
 async def root():
     """Health check endpoint"""
     return {
         "message": "Social Media Automation Platform",
         "status": "healthy",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "api_keys_management": "/api-keys"
     }
 
 

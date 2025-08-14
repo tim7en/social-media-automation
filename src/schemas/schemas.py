@@ -20,6 +20,17 @@ class Platform(str, Enum):
     LINKEDIN = "linkedin"
 
 
+class ServiceType(str, Enum):
+    OPENAI = "openai"
+    ELEVENLABS = "elevenlabs"
+    FLIKI = "fliki"
+    HEYGEN = "heygen"
+    CAPCUT = "capcut"
+    CANVA = "canva"
+    RUNWAY = "runway"
+    PIKA = "pika"
+
+
 class ContentStatus(str, Enum):
     DRAFT = "draft"
     PROCESSING = "processing"
@@ -278,6 +289,44 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+
+# API Key Schemas
+class ApiKeyBase(BaseModel):
+    service_name: ServiceType
+    api_key: str
+
+
+class ApiKeyCreate(ApiKeyBase):
+    pass
+
+
+class ApiKeyUpdate(BaseModel):
+    api_key: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+class ApiKey(BaseModel):
+    id: int
+    user_id: int
+    service_name: ServiceType
+    is_active: bool
+    last_used: Optional[datetime] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    class Config:
+        from_attributes = True
+
+
+class ApiKeyList(BaseModel):
+    service_name: ServiceType
+    is_active: bool
+    last_used: Optional[datetime] = None
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
 
 
 # Response Schemas

@@ -1,8 +1,24 @@
-from typing import Optional, BinaryIO
+from typing import Optional, BinaryIO, TYPE_CHECKING
 import httpx
-from elevenlabs import generate, Voice, VoiceSettings
+from sqlalchemy.ext.asyncio import AsyncSession
+try:
+    from elevenlabs.client import ElevenLabs
+    from elevenlabs import VoiceSettings
+    ELEVENLABS_AVAILABLE = True
+except ImportError:
+    # Fallback for older versions
+    ElevenLabs = None
+    VoiceSettings = None
+    ELEVENLABS_AVAILABLE = False
+
+if TYPE_CHECKING:
+    from elevenlabs.client import ElevenLabs as ElevenLabsType
+else:
+    ElevenLabsType = None
+
 from ..core.config import settings
 from ..core.logger import logger
+from .api_key_service import api_key_service
 import asyncio
 from pathlib import Path
 
@@ -11,13 +27,31 @@ class VoiceGenerator:
     """ElevenLabs voice generation service"""
     
     def __init__(self):
-        self.api_key = settings.ELEVENLABS_API_KEY
-        self.default_voice_id = settings.ELEVENLABS_VOICE_ID
+        self.default_voice_id = getattr(settings, 'ELEVENLABS_VOICE_ID', None)
         self.base_url = "https://api.elevenlabs.io/v1"
+    
+    async def _get_elevenlabs_client(self, user_id: int, db: AsyncSession) -> Optional[ElevenLabsType]:
+        """Get ElevenLabs client with user-specific API key"""
+        api_key = await api_key_service.get_user_api_key(user_id, "elevenlabs", db)
+        if not api_key:
+            logger.warning(f"No ElevenLabs API key found for user {user_id}")
+            return None
+        
+        if not ELEVENLABS_AVAILABLE:
+            logger.error("ElevenLabs library not available")
+            return None
+        
+        try:
+            return ElevenLabs(api_key=api_key)
+        except Exception as e:
+            logger.error(f"Failed to initialize ElevenLabs client for user {user_id}: {e}")
+            return None
     
     async def generate_speech(
         self,
         text: str,
+        user_id: int,
+        db: AsyncSession,
         voice_id: Optional[str] = None,
         stability: float = 0.5,
         similarity_boost: float = 0.75,
@@ -27,39 +61,58 @@ class VoiceGenerator:
     ) -> str:
         """Generate speech from text"""
         
+        client = await self._get_elevenlabs_client(user_id, db)
+        if not client:
+            raise ValueError("ElevenLabs API key not configured for this user")
+        
         voice_id = voice_id or self.default_voice_id
         
         if not voice_id:
+            logger.warning("No voice ID provided and no default voice ID configured")
             raise ValueError("No voice ID provided and no default voice ID configured")
         
+        if not self.api_key:
+            logger.warning("ElevenLabs API key not configured")
+            raise ValueError("ElevenLabs API key not configured")
+        
         try:
-            # Run the synchronous ElevenLabs function in a thread
-            audio = await asyncio.to_thread(
-                generate,
-                text=text,
-                voice=Voice(
-                    voice_id=voice_id,
-                    settings=VoiceSettings(
-                        stability=stability,
-                        similarity_boost=similarity_boost,
-                        style=style,
-                        use_speaker_boost=use_speaker_boost
-                    )
-                ),
-                api_key=self.api_key
-            )
+            # Use HTTP API directly for better compatibility
+            url = f"{self.base_url}/text-to-speech/{voice_id}"
             
-            # Save the audio file
-            if not output_path:
-                output_path = f"/tmp/speech_{hash(text)}.mp3"
+            headers = {
+                "Accept": "audio/mpeg",
+                "Content-Type": "application/json",
+                "xi-api-key": self.api_key
+            }
             
-            Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+            data = {
+                "text": text,
+                "voice_settings": {
+                    "stability": stability,
+                    "similarity_boost": similarity_boost,
+                    "style": style,
+                    "use_speaker_boost": use_speaker_boost
+                }
+            }
             
-            with open(output_path, "wb") as f:
-                f.write(audio)
-            
-            logger.info(f"Generated speech audio: {output_path}")
-            return output_path
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, json=data, headers=headers)
+                
+                if response.status_code == 200:
+                    # Save the audio file
+                    if not output_path:
+                        output_path = f"/tmp/speech_{hash(text)}.mp3"
+                    
+                    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+                    
+                    with open(output_path, "wb") as f:
+                        f.write(response.content)
+                    
+                    logger.info(f"Generated speech audio: {output_path}")
+                    return output_path
+                else:
+                    logger.error(f"ElevenLabs API error: {response.status_code} - {response.text}")
+                    raise Exception(f"ElevenLabs API error: {response.status_code}")
             
         except Exception as e:
             logger.error(f"Error generating speech: {e}")
